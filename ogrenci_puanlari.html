@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Öğrenci Puan Takip Sistemi</title>
+<style>
+  :root {
+    --primary-color: #5a67d8;
+    --primary-dark: #434190;
+    --primary-light: #c3c8ff;
+    --background-light: #f5f7ff;
+    --background-dark: #1f1f38;
+    --text-light: #e6e8ff;
+    --text-dark: #2d2d3a;
+    --red-alert: #e53e3e;
+    --green-success: #48bb78;
+    --shadow-light: rgba(90,103,216,0.25);
+    --shadow-dark: rgba(0,0,0,0.5);
+    --border-radius: 12px;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background-light);
+    color: var(--text-dark);
+    max-width: 950px;
+    margin: 30px auto;
+    padding: 25px 30px 40px;
+    box-shadow: 0 4px 25px var(--shadow-light);
+    border-radius: var(--border-radius);
+    transition: background 0.4s, color 0.4s;
+    user-select: none;
+  }
+
+  body.dark {
+    background: var(--background-dark);
+    color: var(--text-light);
+    box-shadow: 0 4px 25px var(--shadow-dark);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+    color: var(--primary-dark);
+    user-select: none;
+    text-shadow: 1px 1px 4px var(--primary-light);
+  }
+
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 18px 22px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 18px var(--shadow-light);
+    transition: background 0.4s;
+  }
+
+  body.dark form {
+    background: #29294d;
+    box-shadow: 0 8px 20px var(--shadow-dark);
+  }
+
+  form label {
+    font-weight: 700;
+    min-width: 100px;
+    color: var(--primary-color);
+    user-select: none;
+  }
+
+  form input[type="text"],
+  form select {
+    flex: 1 1 200px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 2px solid #d2d6ff;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: #fafaff;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  body.dark form input[type="text"],
+  body.dark form select {
+    background: #3c3c66;
+    color: var(--text-light);
+    border-color: #56568a;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.05);
+  }
+
+  form input[type="text"]:focus,
+  form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-light);
+    background: #eef1ff;
+  }
+
+  body.dark form input[type="text"]:focus,
+  body.dark form select:focus {
+    background: #50508a;
+  }
+
+  form input[type="range"] {
+    width: 150px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    border-radius: 10px;
+    height: 8px;
+    background: #d2d6ff;
+    transition: background 0.3s;
+  }
+
+  form input[type="range"]::-webkit-slider-thumb {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 8px var(--primary-light);
+    transition: background 0.3s;
+  }
+
+  form input[type="range"]:focus {
+    background: var(--primary-light);
+  }
+
+  #scoreValue {
+    min-width: 35px;
+    font-weight: 800;
+    color: var(--primary-color);
+    display: inline-block;
+    text-align: center;
+    user-select: none;
+    font-size: 18px;
+  }
+
+  button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: var(--border-radius);
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    user-select: none;
+    box-shadow: 0 6px 14px var(--shadow-light);
+  }
+
+  button:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 0 8px 18px var(--shadow-light);
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 18px;
+    border-radius: var(--border-radius);
+    border: 2px solid #d2d6ff;
+    margin: 20px 0 30px;
+    font-weight: 600;
+    color: var(--text-dark);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.07);
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  body.dark #searchInput {
+    background: #3c3c66;
+    border-color: #56568a;
+    color: var(--text-light);
+  }
+
+  #searchInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px var(--primary-light);
+    background: #eef1ff;
+  }
+
+  body.dark #searchInput:focus {
+    background: #50508a;
+  }
+
+  #sortBtn, #themeToggleBtn, #exportCsvBtn, #importBtn {
+    margin: 10px 12px 28px 0;
+    font-size: 17px;
+    padding: 10px 22px;
+    box-shadow: 0 5px 12px var(--shadow-light);
+    border-radius: var(--border-radius);
+  }
+
+  body.dark #sortBtn,
+  body.dark #themeToggleBtn,
+  body.dark #exportCsvBtn,
+  body.dark #importBtn {
+    box-shadow: 0 5px 14px var(--shadow-dark);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 16px;
+    font-size: 17px;
+    user-select: none;
+  }
+
+  thead tr {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: left;
+    font-size: 18px;
+    letter-spacing: 0.7px;
+    user-select: none;
+    border-radius: var(--border-radius);
+  }
+
+  thead th {
+    padding: 14px 18px;
+    border-radius: var(--border-radius);
+  }
+
+  tbody tr {
+    background: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+  }
+
+  tbody tr.dark {
+    background: #2d2d4d;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  tbody tr:hover {
+    background-color: #eef2ff;
+    box-shadow: 0 8px 26px var(--shadow-light);
+  }
+
+  tbody tr.dark:hover {
+    background-color: #3f3f6b;
+    box-shadow: 0 8px 26px var(--shadow-dark);
+  }
+
+  tbody td {
+    padding: 14px 18px;
+    vertical-align: middle;
+    border-radius: var(--border-radius);
+  }
+
+  input.edit-name, input.edit-comment {
+    width: 95%;
+    padding: 10px 14px;
+    border: 2px solid #c1c4ff;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    box-shadow: inset 0 2px 8px rgba(99, 103, 255, 0.15);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  body.dark input.edit-name,
+  body.dark input.edit-comment {
+    background: #47476e;
+    border-color: #6f70b7;
+    color: var(--text-light);
+  }
+
+  input.edit-name:focus, input.edit-comment:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px var(--primary-light);
+    background: #eef1ff;
+  }
+
+  body.dark input.edit-name:focus,
+  body.dark input.edit-comment:focus {
+    background: #5a5aae;
+  }
+
+  .score-low {
+    color: var(--red-alert);
+    font-weight: 900;
+  }
+
+  .score-normal {
+    color: var(--primary-dark);
+    font-weight: 800;
+  }
+
+  .score-high {
+    color: var(--green-success);
+    font-weight: 800;
+  }
+
+  .show-history-btn {
+    color: var(--primary-color);
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    transition: color 0.3s;
+  }
+
+  .show-history-btn:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+  }
+
+  #stats {
+    margin-top: 28px;
+    font-size: 16px;
+    color: var(--primary-dark);
+    user-select: none;
+  }
+
+  body.dark #stats {
+    color: var(--primary-light);
+  }
+
+  footer {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    user-select: none;
+  }
+
+  @media (max-width: 700px) {
+    form {
+      flex-direction: column;
+    }
+    form label {
+      min-width: auto;
+    }
+    form input[type="text"], form select {
+      width: 100%;
+    }
+    #sortBtn, #themeToggleBtn, #exportCsvBtn, #importBtn {
+      width: 100%;
+      margin: 12px 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Öğrenci Puan Takip Sistemi</h1>
+
+<form id="addForm">
+  <label for="studentName">Öğrenci Adı:</label>
+  <input type="text" id="studentName" required placeholder="Ad Soyad" autocomplete="off" />
+
+  <label for="group">Sınıf:</label>
+  <select id="group" required>
+    <option value="" disabled selected>Sınıf seçin</option>
+    <option value="9A">9A</option>
+    <option value="9B">9B</option>
+    <option value="10A">10A</option>
+    <option value="10B">10B</option>
+    <option value="11A">11A</option>
+    <option value="11B">11B</option>
+    <option value="12A">12A</option>
+    <option value="12B">12B</option>
+  </select>
+
+  <label for="score">Puan:</label>
+  <input type="range" id="score" min="0" max="100" value="50" />
+  <span id="scoreValue">50</span>
+
+  <label for="comment">Not (Opsiyonel):</label>
+  <input type="text" id="comment" placeholder="Not ekle" autocomplete="off" />
+
+  <button type="submit">Ekle</button>
+</form>
+
+<input type="text" id="searchInput" placeholder="Öğrenci adı veya sınıfa göre ara..." autocomplete="off" />
+
+<div>
+  <button id="sortBtn">Puanlara Göre Sırala ↓</button>
+  <button id="themeToggleBtn">Koyu Tema Aç</button>
+  <button id="exportCsvBtn">CSV Dışa Aktar</button>
+  <button id="importBtn">CSV İçe Aktar</button>
+  <input type="file" id="importCsv" accept=".csv" style="display:none" />
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Öğrenci Adı</th>
+      <th>Sınıf</th>
+      <th>Puan</th>
+      <th>Not</th>
+      <th>Geçmiş Puanlar</th>
+      <th>İşlemler</th>
+    </tr>
+  </thead>
+  <tbody id="studentTableBody">
+  </tbody>
+</table>
+
+<div id="stats"></div>
+
+<footer>© 2025 Öğrenci Puan Takip Sistemi</footer>
+
+<script>
+  const form = document.getElementById('addForm');
+  const studentNameInput = document.getElementById('studentName');
+  const groupSelect = document.getElementById('group');
+  const scoreInput = document.getElementById('score');
+  const scoreValueSpan = document.getElementById('scoreValue');
+  const commentInput = document.getElementById('comment');
+  const searchInput = document.getElementById('searchInput');
+  const sortBtn = document.getElementById('sortBtn');
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importCsv = document.getElementById('importCsv');
+  const tableBody = document.getElementById('studentTableBody');
+  const statsDiv = document.getElementById('stats');
+
+  let scores = JSON.parse(localStorage.getItem('scores')) || [];
+  let sortedDesc = true; // default descending sort
+  let darkMode = false;
+
+  function saveScores() {
+    localStorage.setItem('scores', JSON.stringify(scores));
+  }
+
+  function getAverage() {
+    if(scores.length === 0) return 0;
+    const total = scores.reduce((acc, s) => acc + s.score, 0);
+    return (total / scores.length).toFixed(2);
+  }
+
+  function updateStats() {
+    statsDiv.textContent = `Toplam Öğrenci: ${scores.length} | Ortalama Puan: ${getAverage()}`;
+  }
+
+  function getScoreClass(score) {
+    if (score < 50) return 'score-low';
+    else if(score >= 50 && score < 80) return 'score-normal';
+    else return 'score-high';
+  }
+
+  function createTableRow(student, index) {
+    const tr = document.createElement('tr');
+    if(darkMode) tr.classList.add('dark');
+
+    // Öğrenci adı editable
+    const nameTd = document.createElement('td');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = student.name;
+    nameInput.classList.add('edit-name');
+    nameInput.addEventListener('change', () => {
+      if(nameInput.value.trim() === '') {
+        alert('Öğrenci adı boş olamaz!');
+        nameInput.value = student.name;
+        return;
+      }
+      scores[index].name = nameInput.value.trim();
+      saveScores();
+      renderTable();
+    });
+    nameTd.appendChild(nameInput);
+    tr.appendChild(nameTd);
+
+    // Sınıf editable
+    const groupTd = document.createElement('td');
+    const groupInput = document.createElement('select');
+    ['9A','9B','10A','10B','11A','11B','12A','12B'].forEach(g=>{
+      const opt = document.createElement('option');
+      opt.value = g;
+      opt.textContent = g;
+      if(g === student.group) opt.selected = true;
+      groupInput.appendChild(opt);
+    });
+    groupInput.classList.add('edit-name');
+    groupInput.addEventListener('change', () => {
+      scores[index].group = groupInput.value;
+      saveScores();
+      renderTable();
+    });
+    groupTd.appendChild(groupInput);
+    tr.appendChild(groupTd);
+
+    // Puan editable
+    const scoreTd = document.createElement('td');
+    const scoreInput = document.createElement('input');
+    scoreInput.type = 'number';
+    scoreInput.min = 0;
+    scoreInput.max = 100;
+    scoreInput.value = student.score;
+    scoreInput.classList.add('edit-name');
+    scoreInput.addEventListener('change', () => {
+      let val = Number(scoreInput.value);
+      if(isNaN(val) || val < 0 || val > 100) {
+        alert('Puan 0-100 arasında olmalı!');
+        scoreInput.value = student.score;
+        return;
+      }
+      // Geçmişe ekle
+      scores[index].history.push(scores[index].score);
+      scores[index].score = val;
+      saveScores();
+      renderTable();
+    });
+    scoreTd.appendChild(scoreInput);
+    scoreTd.firstChild.className = getScoreClass(student.score);
+    tr.appendChild(scoreTd);
+
+    // Not editable
+    const commentTd = document.createElement('td');
+    const commentInput = document.createElement('input');
+    commentInput.type = 'text';
+    commentInput.value = student.comment || '';
+    commentInput.classList.add('edit-comment');
+    commentInput.addEventListener('change', () => {
+      scores[index].comment = commentInput.value.trim();
+      saveScores();
+    });
+    commentTd.appendChild(commentInput);
+    tr.appendChild(commentTd);
+
+    // Geçmiş puanlar butonu ve gösterme
+    const historyTd = document.createElement('td');
+    const historyBtn = document.createElement('span');
+    historyBtn.textContent = 'Göster';
+    historyBtn.classList.add('show-history-btn');
+    let historyVisible = false;
+    let historyList;
+
+    historyBtn.addEventListener('click', () => {
+      if(historyVisible) {
+        historyList.remove();
+        historyVisible = false;
+        historyBtn.textContent = 'Göster';
+      } else {
+        historyList = document.createElement('ul');
+        historyList.style.paddingLeft = '18px';
+        historyList.style.marginTop = '8px';
+        scores[index].history.forEach((h,i) => {
+          const li = document.createElement('li');
+          li.textContent = `${i+1}. ${h}`;
+          historyList.appendChild(li);
+        });
+        historyTd.appendChild(historyList);
+        historyVisible = true;
+        historyBtn.textContent = 'Gizle';
+      }
+    });
+
+    historyTd.appendChild(historyBtn);
+    tr.appendChild(historyTd);
+
+    // İşlemler (Sil)
+    const actionTd = document.createElement('td');
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Sil';
+    deleteBtn.style.backgroundColor = '#e53e3e';
+    deleteBtn.style.boxShadow = '0 6px 14px rgba(229, 62, 62, 0.3)';
+    deleteBtn.addEventListener('mouseenter', () => {
+      deleteBtn.style.backgroundColor = '#9b1c1c';
+    });
+    deleteBtn.addEventListener('mouseleave', () => {
+      deleteBtn.style.backgroundColor = '#e53e3e';
+    });
+    deleteBtn.addEventListener('click', () => {
+      if(confirm(`${student.name} adlı öğrenci silinsin mi?`)) {
+        scores.splice(index, 1);
+        saveScores();
+        renderTable();
+      }
+    });
+    actionTd.appendChild(deleteBtn);
+    tr.appendChild(actionTd);
+
+    return tr;
+  }
+
+  function renderTable() {
+    tableBody.innerHTML = '';
+    let filtered = scores.filter(s => {
+      const q = searchInput.value.trim().toLowerCase();
+      return (
+        s.name.toLowerCase().includes(q) ||
+        s.group.toLowerCase().includes(q)
+      );
+    });
+
+    if(sortedDesc) {
+      filtered.sort((a,b) => b.score - a.score);
+    } else {
+      filtered.sort((a,b) => a.score - b.score);
+    }
+
+    filtered.forEach((student, idx) => {
+      const tr = createTableRow(student, scores.indexOf(student));
+      tableBody.appendChild(tr);
+    });
+
+    updateStats();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nameVal = studentNameInput.value.trim();
+    const groupVal = groupSelect.value;
+    const scoreVal = Number(scoreInput.value);
+    const commentVal = commentInput.value.trim();
+
+    if(!nameVal) {
+      alert('Öğrenci adı boş olamaz!');
+      return;
+    }
+    if(!groupVal) {
+      alert('Sınıf seçmelisiniz!');
+      return;
+    }
+    if(scoreVal < 0 || scoreVal > 100) {
+      alert('Puan 0 ile 100 arasında olmalıdır!');
+      return;
+    }
+
+    scores.push({
+      name: nameVal,
+      group: groupVal,
+      score: scoreVal,
+      comment: commentVal,
+      history: []
+    });
+
+    saveScores();
+    renderTable();
+
+    // Temizle
+    studentNameInput.value = '';
+    groupSelect.value = '';
+    scoreInput.value = 50;
+    scoreValueSpan.textContent = '50';
+    commentInput.value = '';
+  });
+
+  scoreInput.addEventListener('input', () => {
+    scoreValueSpan.textContent = scoreInput.value;
+  });
+
+  searchInput.addEventListener('input', () => {
+    renderTable();
+  });
+
+  sortBtn.addEventListener('click', () => {
+    sortedDesc = !sortedDesc;
+    sortBtn.textContent = sortedDesc ? 'Puanlara Göre Sırala ↓' : 'Puanlara Göre Sırala ↑';
+    renderTable();
+  });
+
+  themeToggleBtn.addEventListener('click', () => {
+    darkMode = !darkMode;
+    if(darkMode) {
+      document.body.classList.add('dark');
+      themeToggleBtn.textContent = 'Açık Tema Aç';
+    } else {
+      document.body.classList.remove('dark');
+      themeToggleBtn.textContent = 'Koyu Tema Aç';
+    }
+  });
+
+  exportCsvBtn.addEventListener('click', () => {
+    if(scores.length === 0) {
+      alert('Dışa aktarılacak veri yok!');
+      return;
+    }
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += 'Öğrenci Adı,Sınıf,Puan,Not,Geçmiş Puanlar\n';
+    scores.forEach(s => {
+      const historyStr = s.history.join('|');
+      csvContent += `"${s.name}","${s.group}",${s.score},"${s.comment}","${historyStr}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'ogrenci_puanlari.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
+
+  importBtn.addEventListener('click', () => {
+    importCsv.click();
+  });
+
+  importCsv.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const text = evt.target.result;
+      const lines = text.split('\n').filter(l => l.trim() !== '');
+      if(lines.length < 2) {
+        alert('Geçersiz CSV dosyası.');
+        return;
+      }
+      const newScores = [];
+      for(let i=1; i<lines.length; i++) {
+        const parts = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if(parts.length < 5) continue;
+        const name = parts[0].replace(/(^"|"$)/g, '').trim();
+        const group = parts[1].replace(/(^"|"$)/g, '').trim();
+        const score = Number(parts[2]);
+        const comment = parts[3].replace(/(^"|"$)/g, '').trim();
+        const historyRaw = parts[4].replace(/(^"|"$)/g, '').trim();
+        const history = historyRaw ? historyRaw.split('|').map(Number) : [];
+        if(name && group && !isNaN(score)) {
+          newScores.push({name, group, score, comment, history});
+        }
+      }
+      scores = newScores;
+      saveScores();
+      renderTable();
+      importCsv.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  // İlk yükleme
+  renderTable();
+</script>
+
+</body>
+</html>
